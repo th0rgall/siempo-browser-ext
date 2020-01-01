@@ -1,5 +1,5 @@
 eventLog("background.js loaded", "startup");
-var myTimer = []
+var myTimer = [];
 function everySecond() {
   // Run the counter on the current domain
   if (testMode) {
@@ -81,58 +81,61 @@ function timelineObject(domain, source, timeOverride) {
 
 function showNotification(domain, tabId) {
   // chrome.notifications.create(
-  //   'name-for-notification',{   
-  //   type: 'basic', 
-  //   iconUrl: "../../img/icon/48.png", 
-  //   title: "This is a notification", 
-  //   message: "hello there!" 
+  //   'name-for-notification',{
+  //   type: 'basic',
+  //   iconUrl: "../../img/icon/48.png",
+  //   title: "This is a notification",
+  //   message: "hello there!"
   //   },
 
-   
-    myTimer[tabId] = setInterval(notificationTimeCount, 1000);
-    var currentTime = new Date()
-    
-    
-    
-      function notificationTimeCount() {
-       
-        // console.log()
-        
-        var diff_time = new Date() - currentTime
-        console.log(diff_time/1000)
-        for (var i = 1; i <= settingsLocal.notification_repeat_time; i++){
-          if (Math.round(diff_time / 1000) == 60 * settingsLocal.notification_after_time * i) {
+  myTimer[tabId] = setInterval(notificationTimeCount, 1000);
+  var currentTime = new Date();
 
+  function notificationTimeCount() {
+    // console.log()
 
-            chrome.notifications.create({
-              type: 'basic',
-              iconUrl: "../../img/icon/48.png",
-              title: 'Siempo',
-              message:`Your intention is :- ${localStorage.getItem('intention')}\nYou spent ${Math.round((diff_time / 1000)/60)}+ mins on ${domain}.`
-            })
-            
-              let volume = settingsLocal.notification_sounds_volum/100
-              if (volume === 0) {
-                return
-              }
-            
-              var sound = new Audio('../../sounds/sound.wav')
-              sound.volume = volume
-              sound.play()
-          }
+    var diff_time = new Date() - currentTime;
+    console.log(diff_time / 1000);
+    for (var i = 1; i <= settingsLocal.notification_repeat_time; i++) {
+      if (
+        Math.round(diff_time / 1000) ==
+        60 * settingsLocal.notification_after_time * i
+      ) {
+        chrome.notifications.create({
+          type: "basic",
+          iconUrl: "../../img/icon/48.png",
+          title: "Siempo",
+          message: `Your intention is :- ${localStorage.getItem(
+            "intention"
+          )}\nYou spent ${Math.round(
+            diff_time / 1000 / 60
+          )}+ mins on ${domain}.`
+        });
+
+        let volume = settingsLocal.notification_sounds_volum / 100;
+        if (volume === 0) {
+          return;
         }
 
-        if (Math.round(diff_time / 1000) > 60 * settingsLocal.notification_after_time * settingsLocal.notification_repeat_time) {
-          myStopFunction(myTimer[tabId])
-        }
-        
+        var sound = new Audio("../../sounds/sound.wav");
+        sound.volume = volume;
+        sound.play();
+      }
+    }
 
-      }
-      
-      function myStopFunction(timer) {
-        clearInterval(timer);
-      }
- 
+    if (
+      Math.round(diff_time / 1000) >
+      60 *
+        settingsLocal.notification_after_time *
+        settingsLocal.notification_repeat_time
+    ) {
+      myStopFunction(myTimer[tabId]);
+    }
+  }
+
+  function myStopFunction(timer) {
+    clearInterval(timer);
+  }
 }
 // Check whether new version is installed
 chrome.runtime.onInstalled.addListener(function(details) {
@@ -152,9 +155,9 @@ chrome.runtime.onInstalled.addListener(function(details) {
 });
 
 // Tab closed, and tell about shutdown
-chrome.tabs.onRemoved.addListener(function (tabId) {
+chrome.tabs.onRemoved.addListener(function(tabId) {
   if (myTimer[tabId] !== undefined) {
-    clearInterval(myTimer[tabId]);  
+    clearInterval(myTimer[tabId]);
   }
   if (typeof tabIdStorage[tabId] === undefined) {
     return;
@@ -208,7 +211,7 @@ function tabsChecker(tabs, domain) {
 }
 
 // When Chrome window closed
-chrome.windows.onRemoved.addListener(function (windowId) {
+chrome.windows.onRemoved.addListener(function(windowId) {
   chrome.windows.getAll(null, function(windows) {
     if (windows.length === 0) {
       timeline(notInChrome, "chrome.windows.onRemoved");
@@ -285,12 +288,10 @@ chrome.tabs.onCreated.addListener(function(tab) {
     nudge: false
   };
 });
- 
+
 // Add to timeline onUpdated
 // Update URL in tabIdStorage
-chrome.tabs.onUpdated.addListener(function (tabId, changeInfo, tab) {
-
- 
+chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
   try {
     var domain = inDomainsSetting(tab.url);
   } catch (e) {
@@ -299,14 +300,38 @@ chrome.tabs.onUpdated.addListener(function (tabId, changeInfo, tab) {
     return;
   }
 
+  try {
+    console.log("new tab url: " + tab.url);
+    // TODO problem: can't access settings at this point, probably not loaded yet
+    // console.log("show_int " + JSON.stringify(settings));
+    if (
+      tab.url === "chrome://newtab/" ||
+      tab.url === "about:newtab"
+      // settings.show_intention
+      // true
+    ) {
+      const intentionURL = chrome.extension.getURL(
+        "html/pages/intention_newtab.html"
+      );
+      chrome.tabs.update(tabId, { url: intentionURL });
+    }
+  } catch (e) {
+    console.log(e);
+    console.log("Couldn't redirect to newtab");
+  }
+
   // Switch off
-  
-  if (domain && domain in settingsLocal.domains && changeInfo.status == 'loading') {
+
+  if (
+    domain &&
+    domain in settingsLocal.domains &&
+    changeInfo.status == "loading"
+  ) {
     // If off
     if (settingsLocal.domains[domain]["off"]) {
       if (settingsLocal.off_by_default) {
-        console.log("Tab updating............",changeInfo.status)
-        
+        console.log("Tab updating............", changeInfo.status);
+
         switchOff(domain, tab.url, tabId, "bydefault");
         // showNotification()
       } else {

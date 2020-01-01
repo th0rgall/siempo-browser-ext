@@ -21,7 +21,7 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
   console.log(request);
   if (request.type === "send_settingsLocal") {
     settingsLocal = request.settingsLocal;
-    console.log(settingsLocal);
+    console.log(settingsLoal);
   }
 });
 
@@ -100,13 +100,12 @@ function toggleBoolean(id) {
   toggleClass(right, "on");
 }
 
-addDomain.addEventListener("keydown", function (event) {
-  
+addDomain.addEventListener("keydown", function(event) {
   if (event.key === "Enter") {
     var newDomain = addDomain.value;
     var domainCheck = new RegExp(
       "^(([a-zA-Z]{1})|([a-zA-Z]{1}[a-zA-Z]{1})|([a-zA-Z]{1}[0-9]{1})|([0-9]{1}[a-zA-Z]{1})|([a-zA-Z0-9][a-zA-Z0-9-_]{1,61}[a-zA-Z0-9])).([a-zA-Z]{2,6}|[a-zA-Z0-9-]{2,30}.[a-zA-Z]{2,3})(/(([a-zA-Z]{1})|([a-zA-Z]{1}[a-zA-Z]{1})|([a-zA-Z]{1}[0-9]{1})|([0-9]{1}[a-zA-Z]{1})|([a-zA-Z0-9][a-zA-Z0-9-_]{1,200}[a-zA-Z0-9]))?)?(/)?$"
-    );    
+    );
     var isInDomainList = false;
     var nudge = true;
     if (domainCheck.test(newDomain)) {
