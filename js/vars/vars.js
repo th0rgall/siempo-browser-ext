@@ -69,6 +69,7 @@ var defaultSettings = {
   time_nudge: true,
   compulsive_nudge: true,
   show_intro: 0,
+  show_intention: true,
   share_data: true,
   // New settings
   show_switch: true,

@@ -160,4 +160,10 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
       }
     });
   }
+  if (request.type === "open_newtab") {
+    // sender.tab.url = "about:newtab"; // <-- does not work
+    // chrome.tabs.update(sender.tab.id, { url: "about:newtab" });
+    chrome.tabs.update(sender.tab.id, { url: "https://duckduckgo.com" });
+    sendResponse("Tried to change the url");
+  }
 });
